@@ -20,7 +20,7 @@ const isAuthenticated = (req, res, next) => {
             next();
       } catch (error) {
             console.error("Error verifying token:", error);
-            return res.status(500).json({
+            return res.status(401).json({
                   success: false,
                   message: "Failed to verify token"
             });

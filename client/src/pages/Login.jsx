@@ -71,7 +71,7 @@ const Login = () => {
            }
             if(loginError)
            {
-            toast.error(loginError.data.message || "Login failed. Please try again.");
+            toast.error(loginError?.data?.message || "Login failed. Please try again.");
            }
       }, [
 

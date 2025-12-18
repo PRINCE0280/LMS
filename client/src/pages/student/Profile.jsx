@@ -12,11 +12,16 @@ const Profile = () => {
   const [profilePhoto, setProfilePhoto] = useState("");
   
   // All hooks must be at the top before any conditional returns
-  const { data, isLoading } = useLoadUserQuery();
+  const { data, isLoading, refetch } = useLoadUserQuery();
   const [updateUser, { data: updateUserData, isLoading: updateUserIsLoading, isError, isSuccess , error}] = useUpdateUserMutation();
 
   useEffect(() => {
+   refetch();
+  },[]);
+
+  useEffect(() => {
     if (isSuccess) {
+       refetch();
       toast.success(updateUserData?.message || "Profile Updated");
     }
     if (isError) {
@@ -35,9 +40,9 @@ const Profile = () => {
     return <ProfileSkeleton />;
   }
 
-  console.log(data);
+ 
 
-  const { user } = data;
+  const user  = data && data.user;
 
   const onChangeHandler = (e) => {
     const file = e.target.files?.[0];
@@ -161,7 +166,7 @@ const Profile = () => {
                   <h1>You aren't enrolled in any courses.</h1>
                 ) : (
                   user?.enrolledCourses.map((course) => (
-                    <Course key={course._id} />
+                    <Course key={course._id} course={course} />
                   ))
                 )
               }

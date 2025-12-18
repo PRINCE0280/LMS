@@ -1,5 +1,5 @@
 import { Menu, School } from 'lucide-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from './ui/button'
 import {
   DropdownMenu,
@@ -22,18 +22,34 @@ import {
 } from './ui/sheet'
 
 import { Separator } from '@radix-ui/react-dropdown-menu'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useLogoutUserMutation } from '@/features/api/authapi'
+import { toast } from 'sonner'
+import { useSelector } from 'react-redux'
 
 const Navbar = () => {
-  const user = true
+  const {user} = useSelector((store) => store.auth);
+  const [logoutUser , {data, isSuccess}] = useLogoutUserMutation();
+  const navigate = useNavigate();
+  const logoutHandler = async () => {
+    await logoutUser();
+  }
+   useEffect(() => {
+    if (isSuccess) {
+      toast.success(data.message || "Logged out successfully");
+      navigate("/login");
+    }
+  } , [isSuccess]);
+
 
   return (
-    <div className="fixed top-0 inset-x-0 z-10 border-b border-b-gray-200 dark:border-b-gray-800 bg-white dark:bg-[#0A0A0A] transition-colors duration-200">
+    <div className="fixed top-0 inset-x-0 z-10 border-b border-b-gray-200 dark:border-b-gray-800 bg-white dark:bg-gray-900 transition-colors duration-200">
       {/* Desktop header */}
       <div className="max-w-7xl mx-auto hidden md:flex justify-between items-center gap-4 h-16 px-4">
         <div className="flex items-center gap-2">
           <School size={30} />
-          <h1 className="font-extrabold text-2xl">E-Learning</h1>
+         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}> <h1 className="font-extrabold text-2xl">E-Learning</h1>
+         </Link>
         </div>
 
         <div className="flex items-center gap-8">
@@ -41,7 +57,7 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage src={user?.photoUrl || "https://github.com/shadcn.png" } alt="@shadcn" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -57,20 +73,26 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/profile">Edit Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/logout">Log out</Link>
+                  <DropdownMenuItem onClick={logoutHandler}>
+                    Log out
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
+                {
+                  user?.role === 'instructor' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/dashboard">Dashboard</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )
+                }
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="outline">Log in</Button>
-              <Button>Sign up</Button>
+              <Button variant="outline" onClick={() => navigate("/login")}>Log in</Button>
+              <Button onClick={() => navigate("/login")}>Sign up</Button>
             </div>
           )}
 
@@ -84,7 +106,7 @@ const Navbar = () => {
       {/* Mobile header */}
       <div className="flex md:hidden items-center justify-between h-16 px-4">
         <h1 className="font-extrabold text-lg">E-Learning</h1>
-        <MobileNavbar />
+        <MobileNavbar user={user} />
       </div>
     </div>
   )
@@ -92,20 +114,32 @@ const Navbar = () => {
 
 export default Navbar
 
-const MobileNavbar = () => {
-  const role = 'instructor'
+const MobileNavbar = ({ user }) => {
+  const [logoutUser, { data, isSuccess }] = useLogoutUserMutation();
+  const navigate = useNavigate();
+
+  const logoutHandler = async () => {
+    await logoutUser();
+  }
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data.message || "Logged out successfully");
+      navigate("/login");
+    }
+  }, [isSuccess]);
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" className="rounded-full bg-gray-200 hover:bg-gray-200" variant="outline">
+        <Button size="icon" className="rounded-full hover:bg-gray-200" variant="outline">
           <Menu />
         </Button>
       </SheetTrigger>
 
       <SheetContent className="flex flex-col px-6 pt-4">
         <SheetHeader className="flex flex-row items-center justify-between mt-2 pr-8">
-          <SheetTitle>E-Learning</SheetTitle>
+          <SheetTitle><Link to="/">E-Learning</Link></SheetTitle>
           {/* FIX: prevent propagation to avoid re-triggering sheet */}
           <div onClick={(e) => e.stopPropagation()}>
             <DarkMode />
@@ -132,17 +166,19 @@ const MobileNavbar = () => {
             </Link>
           </SheetClose>
           <SheetClose asChild>
-            <Link
-              to="/logout"
-              className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground"
+            <button
+              onClick={logoutHandler}
+              className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground w-full"
             >
               Log Out
-            </Link>
+            </button>
           </SheetClose>
 
-          {role === 'instructor' && (
+          {user?.role === 'instructor' && (
             <SheetClose asChild>
-              <Button className="w-full">Dashboard</Button>
+              <Link to="/admin/dashboard">
+                <Button className="w-full">Dashboard</Button>
+              </Link>
             </SheetClose>
           )}
         </nav>

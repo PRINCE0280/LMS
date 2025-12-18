@@ -1,17 +1,21 @@
 import React from 'react'
 import { Skeleton } from '@/components/ui/skeleton';
 import Course from './Course';
+import { useGetPublishedCoursesQuery } from '@/features/api/courseApi';
 
-const courses = [1, 2, 3, 4, 5, 6];
 const Courses = () => {
-      const isLoading = false; 
+  const { data, isLoading, isError} = useGetPublishedCoursesQuery();
+  if(isError) return <h1>Error in loading courses</h1>;
+
   return (
-    <div className='bg-white dark:bg-gray-900'>
+    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white dark:bg-[#111827] min-h-screen overflow-x-hidden">
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'>
         <h2 className='text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10'>Our Courses</h2>
        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
           {
-            isLoading ? Array.from({ length: 8 }).map((_, index) => <CourseSkeleton key={index} />) : ( courses.map(course => <Course key={course} />) )
+            isLoading ? Array.from({ length: 8 }).map((_, index) => <CourseSkeleton key={index} />) : 
+            ( 
+              data?.courses && data.courses.map(course => <Course key={course._id} course={course} />) )
 
        }
        </div>

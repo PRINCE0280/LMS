@@ -4,6 +4,10 @@ import connectDB from './database/db.js';
 import userRoutes from './routes/user.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import courseRoutes from './routes/course.route.js';
+import mediaRoute from './routes/media.route.js';
+import purchaseRoute from './routes/purchaseCourse.route.js';
+import courseProgressRoute from './routes/courseProgress.route.js';
 dotenv.config({});
 
 connectDB();
@@ -20,9 +24,11 @@ app.use(cors({
 }));
 
 //apis
+app.use('/api/v1/media',mediaRoute );
 app.use('/api/v1/user', userRoutes);
-
-
+app.use('/api/v1/course', courseRoutes);
+app.use('/api/v1/purchase', purchaseRoute);
+app.use('/api/v1/progress', courseProgressRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
