@@ -11,6 +11,71 @@ export const authApi = createApi({
             credentials: "include",
       }),
       endpoints: (builder) => ({
+            sendRegisterOTP: builder.mutation({
+                  query: (inputData) => ({
+                        url: "send-otp",
+                        method: "POST",
+                        body: inputData,
+                  })
+            }),
+            sendLoginOTP: builder.mutation({
+                  query: (inputData) => ({
+                        url: "send-login-otp",
+                        method: "POST",
+                        body: inputData,
+                  }),
+                  async onQueryStarted(_, { queryFulfilled, dispatch }) {
+                        try {
+                              const result = await queryFulfilled;
+                              // If user object is returned, it means instructor logged in directly
+                              if (result.data.user) {
+                                    dispatch(userLoggedIn({ user: result.data.user }));
+                              }
+                        }
+                        catch (error) {
+                              console.log(error);
+                        }
+                  },
+            }),
+            verifyOTP: builder.mutation({
+                  query: (inputData) => ({
+                        url: "verify-otp",
+                        method: "POST",
+                        body: inputData,
+                  }),
+                  async onQueryStarted(_, { queryFulfilled, dispatch }) {
+                        try {
+                              const result = await queryFulfilled;
+                              dispatch(userLoggedIn({ user: result.data.user }));
+                        }
+                        catch (error) {
+                              console.log(error);
+                        }
+                  },
+            }),
+            verifyLoginOTP: builder.mutation({
+                  query: (inputData) => ({
+                        url: "verify-login-otp",
+                        method: "POST",
+                        body: inputData,
+                  }),
+                  async onQueryStarted(_, { queryFulfilled, dispatch }) {
+                        try {
+                              const result = await queryFulfilled;
+                              dispatch(userLoggedIn({ user: result.data.user }));
+                        }
+                        catch (error) {
+                              console.log(error);
+                        }
+                  },
+            }),
+            resendOTP: builder.mutation({
+                  query: (inputData) => ({
+                        url: "resend-otp",
+                        method: "POST",
+                        body: inputData,
+                  })
+            }),
             registerUser: builder.mutation({
                   query: (inputData) => ({
                         url: "register",
@@ -78,4 +143,15 @@ export const authApi = createApi({
       }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation , useLoadUserQuery , useUpdateUserMutation , useLogoutUserMutation} = authApi;
+export const { 
+      useRegisterUserMutation, 
+      useLoginUserMutation, 
+      useLoadUserQuery, 
+      useUpdateUserMutation, 
+      useLogoutUserMutation,
+      useSendRegisterOTPMutation,
+      useSendLoginOTPMutation,
+      useVerifyOTPMutation,
+      useVerifyLoginOTPMutation,
+      useResendOTPMutation
+} = authApi;

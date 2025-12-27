@@ -374,3 +374,43 @@ export const toggleCoursePublish = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to toggle course publish status', error: error.message });
       }
 };
+
+// Unenroll student from course (Instructor only)
+export const unenrollStudent = async (req, res) => {
+      try {
+            const { courseId, studentId } = req.params;
+            const instructorId = req.id;
+
+            const course = await Course.findOne({ _id: courseId, creator: instructorId });
+            if (!course) {
+                  return res.status(403).json({
+                        message: 'You are not authorized to remove students from this course'
+                  });
+            }
+
+            // Check if student is enrolled
+            if (!course.enrolledStudents.includes(studentId)) {
+                  return res.status(400).json({
+                        message: 'Student is not enrolled in this course'
+                  });
+            }
+
+            // Remove student from enrolledStudents array
+            course.enrolledStudents = course.enrolledStudents.filter(
+                  id => id.toString() !== studentId.toString()
+            );
+            await course.save();
+
+            return res.status(200).json({
+                  success: true,
+                  message: 'Student removed from course successfully'
+            });
+      } catch (error) {
+            console.log("Failed to unenroll student:", error);
+            return res.status(500).json({ 
+                  success: false, 
+                  message: 'Failed to remove student from course', 
+                  error: error.message 
+            });
+      }
+};

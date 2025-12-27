@@ -7,14 +7,15 @@ import {
   useInCompleteCourseMutation,
   useUpdateLectureProgressMutation,
 } from "@/features/api/courseProgressApi";
-import { CheckCircle, CheckCircle2, CirclePlay } from "lucide-react";
+import { CheckCircle, CheckCircle2, CirclePlay, FileText, Trophy } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ReactPlayer from "react-player";
 
 const CourseProgress = () => {
   const params = useParams();
+  const navigate = useNavigate();
   const courseId = params.courseId;
   const { data, isLoading, isError, refetch } =
     useGetCourseProgressQuery(courseId, {
@@ -124,8 +125,12 @@ const CourseProgress = () => {
   };
 
   const handleLectureProgress = async (lectureId) => {
-    await updateLectureProgress({ courseId, lectureId });
-    refetch();
+    try {
+      await updateLectureProgress({ courseId, lectureId }).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Failed to update lecture progress:", error);
+    }
   };
   // Handle select a specific lecture to watch
   const handleSelectLecture = (lecture) => {
@@ -142,22 +147,38 @@ const CourseProgress = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 mt-20 mb-10">
+    <div className="max-w-7xl mx-auto p-4 mt-24 mb-10">
       {/* Display course name  */}
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">{courseTitle}</h1>
-        <Button
-          onClick={completed ? handleInCompleteCourse : handleCompleteCourse}
-          variant={completed ? "outline" : "default"}
-        >
-          {completed ? (
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>{" "}
-            </div>
-          ) : (
-            "Mark as completed"
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/student/assignments/${courseId}`)}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Assignments
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/student/quizzes/${courseId}`)}
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            Quizzes
+          </Button>
+          <Button
+            onClick={completed ? handleInCompleteCourse : handleCompleteCourse}
+            variant={completed ? "outline" : "default"}
+          >
+            {completed ? (
+              <div className="flex items-center">
+                <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>{" "}
+              </div>
+            ) : (
+              "Mark as completed"
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">

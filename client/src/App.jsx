@@ -4,6 +4,8 @@ import HeroSection from "./pages/student/HeroSection"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import MainLayout from "./layout/MainLayout"
 import Courses from "./pages/student/Courses"
+import CareerSkills from "./pages/student/CareerSkills"
+import GenerateAI from "./pages/student/GenerateAI"
 import MyLearning from "./pages/student/MyLearning"
 import Profile from "./pages/student/Profile"
 import Sidebar from "./pages/admin/lecture/Sidebar"
@@ -18,7 +20,23 @@ import CourseProgress from './pages/student/CourseProgress'
 import SearchPage from './pages/student/SearchPage'
 import { AdminRoute, AuthenticatedUser, ProtectedRoute } from './components/ProtectedRoutes'
 import PurchaseCourseProtectedRoute from './components/PurchaseCourseProtectedRoute'
+import SubscriptionProtectedRoute from './components/SubscriptionProtectedRoute'
 import { ThemeProvider } from './components/ThemeProvider'
+import CreateAssignment from './pages/admin/assignment/CreateAssignment'
+import AssignmentList from './pages/admin/assignment/AssignmentList'
+import AssignmentSubmissions from './pages/admin/assignment/AssignmentSubmissions'
+import CreateQuiz from './pages/admin/quiz/CreateQuiz'
+import EditQuiz from './pages/admin/quiz/EditQuiz'
+import QuizList from './pages/admin/quiz/QuizList'
+import QuizAttempts from './pages/admin/quiz/QuizAttempts'
+import BulkImportQuiz from './pages/admin/quiz/BulkImportQuiz'
+import QuizConverter from './pages/admin/quiz/QuizConverter'
+import StudentManagement from './pages/admin/StudentManagement'
+import StudentAssignments from './pages/student/StudentAssignments'
+import AssignmentSubmission from './pages/student/AssignmentSubmission'
+import StudentQuizzes from './pages/student/StudentQuizzes'
+import TakeQuiz from './pages/student/TakeQuiz'
+import QuizResult from './pages/student/QuizResult'
 
 
   const appRouter = createBrowserRouter([
@@ -31,6 +49,7 @@ import { ThemeProvider } from './components/ThemeProvider'
           element: (
             <>
               <HeroSection />
+              <CareerSkills />
               <Courses />
             </>
           ),
@@ -48,6 +67,14 @@ import { ThemeProvider } from './components/ThemeProvider'
           element: <ProtectedRoute> <Profile /></ProtectedRoute>
         },
         {
+          path: "generate-ai",
+          element: <ProtectedRoute>
+            <SubscriptionProtectedRoute subscriptionType="generative-ai">
+              <GenerateAI />
+            </SubscriptionProtectedRoute>
+          </ProtectedRoute>
+        },
+        {
           path: "course/search",
           element: <ProtectedRoute><SearchPage /></ProtectedRoute>
         },
@@ -62,6 +89,34 @@ import { ThemeProvider } from './components/ThemeProvider'
               <CourseProgress />
             </PurchaseCourseProtectedRoute>
           </ProtectedRoute>
+        },
+        {
+          path: "student/assignments/:courseId",
+          element: <ProtectedRoute>
+            <PurchaseCourseProtectedRoute>
+              <StudentAssignments />
+            </PurchaseCourseProtectedRoute>
+          </ProtectedRoute>
+        },
+        {
+          path: "student/assignment/:assignmentId",
+          element: <ProtectedRoute><AssignmentSubmission /></ProtectedRoute>
+        },
+        {
+          path: "student/quizzes/:courseId",
+          element: <ProtectedRoute>
+            <PurchaseCourseProtectedRoute>
+              <StudentQuizzes />
+            </PurchaseCourseProtectedRoute>
+          </ProtectedRoute>
+        },
+        {
+          path: "student/quiz/:quizId/start",
+          element: <ProtectedRoute><TakeQuiz /></ProtectedRoute>
+        },
+        {
+          path: "student/quiz/result/:attemptId",
+          element: <ProtectedRoute><QuizResult /></ProtectedRoute>
         },
         {
           path: "admin",
@@ -86,9 +141,74 @@ import { ThemeProvider } from './components/ThemeProvider'
             {
               path: "courses/:courseId/lectures",
               element: <CreateLecture />
-            }, {
+            }, 
+            {
               path: "courses/:courseId/lectures/:lectureId",
               element: <EditLecture />
+            },
+            {
+              path: "course/:courseId/students",
+              element: <StudentManagement />
+            },
+            {
+              path: "courses/:courseId/students",
+              element: <StudentManagement />
+            },
+            {
+              path: "course/:courseId/assignments",
+              element: <AssignmentList />
+            },
+            {
+              path: "courses/:courseId/assignments",
+              element: <AssignmentList />
+            },
+            {
+              path: "course/:courseId/assignment/create",
+              element: <CreateAssignment />
+            },
+            {
+              path: "courses/:courseId/assignment/create",
+              element: <CreateAssignment />
+            },
+            {
+              path: "assignment/:assignmentId/submissions",
+              element: <AssignmentSubmissions />
+            },
+            {
+              path: "course/:courseId/quizzes",
+              element: <QuizList />
+            },
+            {
+              path: "courses/:courseId/quizzes",
+              element: <QuizList />
+            },
+            {
+              path: "course/:courseId/quiz/create",
+              element: <CreateQuiz />
+            },
+            {
+              path: "courses/:courseId/quiz/create",
+              element: <CreateQuiz />
+            },
+            {
+              path: "course/:courseId/quiz/bulk-import",
+              element: <BulkImportQuiz />
+            },
+            {
+              path: "courses/:courseId/quiz/bulk-import",
+              element: <BulkImportQuiz />
+            },
+            {
+              path: "quiz-converter",
+              element: <QuizConverter />
+            },
+            {
+              path: "quiz/:quizId/edit",
+              element: <EditQuiz />
+            },
+            {
+              path: "quiz/:quizId/attempts",
+              element: <QuizAttempts />
             }
           ]
         }

@@ -120,6 +120,12 @@ export const courseApi = createApi
                         }),
                         invalidatesTags: ["Refetch_Creator_Course", "Refetch_Published_Courses"],
                   }),
+                  unenrollStudent: builder.mutation({
+                        query: ({ courseId, studentId }) => ({
+                              url: `/${courseId}/student/${studentId}`,
+                              method: 'DELETE',
+                        }),
+                  }),
             }),
       });
 export const { useCreateCourseMutation,
@@ -135,5 +141,6 @@ export const { useCreateCourseMutation,
       useGetLectureByIdQuery,
       usePublishCourseMutation,
       useRemoveCourseMutation,
+      useUnenrollStudentMutation,
 
 } = courseApi;

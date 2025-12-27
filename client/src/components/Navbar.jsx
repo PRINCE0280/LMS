@@ -1,5 +1,5 @@
 import { Menu, School } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import {
   DropdownMenu,
@@ -26,11 +26,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLogoutUserMutation } from '@/features/api/authapi'
 import { toast } from 'sonner'
 import { useSelector } from 'react-redux'
+import AuthModal from './AuthModal'
 
 const Navbar = () => {
   const {user} = useSelector((store) => store.auth);
   const [logoutUser , {data, isSuccess}] = useLogoutUserMutation();
   const navigate = useNavigate();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const logoutHandler = async () => {
     await logoutUser();
   }
@@ -91,8 +93,8 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => navigate("/login")}>Log in</Button>
-              <Button onClick={() => navigate("/login")}>Sign up</Button>
+              <Button variant="outline" onClick={() => setIsAuthModalOpen(true)}>Log in</Button>
+              <Button onClick={() => setIsAuthModalOpen(true)}>Sign up</Button>
             </div>
           )}
 
@@ -103,10 +105,12 @@ const Navbar = () => {
         </div>
       </div>
 
+      <AuthModal open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen} />
+
       {/* Mobile header */}
       <div className="flex md:hidden items-center justify-between h-16 px-4">
         <h1 className="font-extrabold text-lg">E-Learning</h1>
-        <MobileNavbar user={user} />
+        <MobileNavbar user={user} setIsAuthModalOpen={setIsAuthModalOpen} />
       </div>
     </div>
   )
@@ -114,7 +118,7 @@ const Navbar = () => {
 
 export default Navbar
 
-const MobileNavbar = ({ user }) => {
+const MobileNavbar = ({ user, setIsAuthModalOpen }) => {
   const [logoutUser, { data, isSuccess }] = useLogoutUserMutation();
   const navigate = useNavigate();
 
@@ -149,37 +153,61 @@ const MobileNavbar = ({ user }) => {
         <Separator className="my-3" />
 
         <nav className="flex flex-col space-y-2">
-          <SheetClose asChild>
-            <Link
-              to="/my-learning"
-              className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground"
-            >
-              My Learning
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              to="/profile"
-              className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground"
-            >
-              Edit Profile
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <button
-              onClick={logoutHandler}
-              className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground w-full"
-            >
-              Log Out
-            </button>
-          </SheetClose>
+          {user ? (
+            <>
+              <SheetClose asChild>
+                <Link
+                  to="/my-learning"
+                  className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground"
+                >
+                  My Learning
+                </Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link
+                  to="/profile"
+                  className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground"
+                >
+                  Edit Profile
+                </Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <button
+                  onClick={logoutHandler}
+                  className="px-3 py-2 text-sm rounded-md text-left hover:bg-accent hover:text-accent-foreground w-full"
+                >
+                  Log Out
+                </button>
+              </SheetClose>
 
-          {user?.role === 'instructor' && (
-            <SheetClose asChild>
-              <Link to="/admin/dashboard">
-                <Button className="w-full">Dashboard</Button>
-              </Link>
-            </SheetClose>
+              {user?.role === 'instructor' && (
+                <SheetClose asChild>
+                  <Link to="/admin/dashboard">
+                    <Button className="w-full">Dashboard</Button>
+                  </Link>
+                </SheetClose>
+              )}
+            </>
+          ) : (
+            <>
+              <SheetClose asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Log in
+                </Button>
+              </SheetClose>
+              <SheetClose asChild>
+                <Button 
+                  className="w-full"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Sign up
+                </Button>
+              </SheetClose>
+            </>
           )}
         </nav>
       </SheetContent>

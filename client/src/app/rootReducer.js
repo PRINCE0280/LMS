@@ -4,6 +4,9 @@ import { authApi } from '@/features/api/authapi';
 import { courseApi } from '@/features/api/courseApi';
 import { purchaseApi } from '@/features/api/purchaseApi';
 import { courseProgressApi } from '@/features/api/courseProgressApi';
+import { subscriptionApi } from '@/features/api/subscriptionApi';
+import { assignmentApi } from '@/features/api/assignmentApi';
+import { quizApi } from '@/features/api/quizApi';
 
 
 const rootReducer = combineReducers({
@@ -11,6 +14,9 @@ const rootReducer = combineReducers({
    [courseApi.reducerPath]: courseApi.reducer, 
    [purchaseApi.reducerPath]: purchaseApi.reducer, 
    [courseProgressApi.reducerPath]: courseProgressApi.reducer,
+   [subscriptionApi.reducerPath]: subscriptionApi.reducer,
+   [assignmentApi.reducerPath]: assignmentApi.reducer,
+   [quizApi.reducerPath]: quizApi.reducer,
    auth: authReducer,
 });
 

@@ -12,9 +12,9 @@ const Course = ({course}) => {
 
   return (
    <Link to={`/course-detail/${course._id}`} className="block h-full group"> 
-   <Card className="relative rounded-2xl dark:bg-[#111827] bg-white border-2 border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-2xl hover:border-blue-300 dark:hover:border-blue-600 transform hover:-translate-y-2 transition-all duration-300 w-full h-full p-0 overflow-hidden flex flex-col">
+   <Card className="relative rounded-2xl dark:bg-gray-800 bg-white shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 w-full h-full p-0 overflow-hidden flex flex-col border-0">
       {/* Thumbnail with overlay gradient */}
-      <div className="relative w-full aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-[#111827] dark:to-[#111827] flex-shrink-0 overflow-hidden">
+      <div className="relative w-full aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-700 dark:to-gray-800 flex-shrink-0 overflow-hidden">
         <img
         src={course?.CourseThumbnail || course?.courseThumbnail || "https://via.placeholder.com/400x300?text=No+Thumbnail"}
           alt="Course"
@@ -31,8 +31,8 @@ const Course = ({course}) => {
       </div>
 
       {/* Content */}
-          <CardContent className="px-5 py-4 flex flex-col flex-grow bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-800/50">
-        <h1 className="font-bold text-base md:text-lg text-gray-900 dark:text-white line-clamp-2 mb-3 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+          <CardContent className="px-6 py-6 flex flex-col flex-grow bg-white dark:bg-gray-800">
+        <h1 className="font-bold text-xl text-gray-900 dark:text-white line-clamp-2 mb-3 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
           {course?.courseTitle || "Untitled Course"}
         </h1>
 

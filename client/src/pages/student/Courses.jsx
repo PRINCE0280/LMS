@@ -8,10 +8,10 @@ const Courses = () => {
   if(isError) return <h1>Error in loading courses</h1>;
 
   return (
-    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white dark:bg-[#111827] min-h-screen overflow-x-hidden">
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12'>
-        <h2 className='text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10'>Our Courses</h2>
-       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white dark:bg-gray-800 overflow-x-hidden mt-12">
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16'>
+        <h2 className='text-3xl sm:text-4xl font-bold mb-10 text-gray-900 dark:text-white'>Our Courses</h2>
+       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {
             isLoading ? Array.from({ length: 8 }).map((_, index) => <CourseSkeleton key={index} />) : 
             ( 
