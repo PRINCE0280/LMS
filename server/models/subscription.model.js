@@ -10,7 +10,7 @@ const subscriptionSchema = new mongoose.Schema(
     subscriptionType: {
       type: String,
       required: true,
-      enum: ["generative-ai"],
+      enum: ["generative-ai", "it-certifications", "data-science"],
     },
     amount: {
       type: Number,

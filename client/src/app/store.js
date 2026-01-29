@@ -7,6 +7,7 @@ import { courseProgressApi } from '@/features/api/courseProgressApi';
 import { subscriptionApi } from '@/features/api/subscriptionApi';
 import { assignmentApi } from '@/features/api/assignmentApi';
 import { quizApi } from '@/features/api/quizApi';
+import { reviewApi } from '@/features/api/reviewApi';
 
 export const appStore = configureStore({     
       reducer: rootReducer,
@@ -17,7 +18,8 @@ export const appStore = configureStore({
             courseProgressApi.middleware,
             subscriptionApi.middleware,
             assignmentApi.middleware,
-            quizApi.middleware
+            quizApi.middleware,
+            reviewApi.middleware
       )
 });    
 

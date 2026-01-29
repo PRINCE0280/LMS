@@ -6,10 +6,13 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetCourseDetailsWithStatusQuery } from "@/features/api/purchaseApi";
 import ReactPlayer from "react-player";
+import CourseReviews from "@/components/CourseReviews";
+import { useSelector } from "react-redux";
 
 const CourseDetail = () => {
   const { courseId } = useParams(); 
   const navigate = useNavigate();
+  const { user } = useSelector((store) => store.auth);
 
   // Use the new query to fetch both course details and purchase status
   const { data, isLoading, isError, refetch } = useGetCourseDetailsWithStatusQuery(courseId, {
@@ -163,6 +166,14 @@ const CourseDetail = () => {
             </CardFooter>
           </Card>
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="max-w-7xl mx-auto my-10 px-4 md:px-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Reviews and Ratings
+        </h2>
+        <CourseReviews courseId={courseId} showUserReviewFirst={purchased && user} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import User from '../models/user.model.js';
 export const createQuiz = async (req, res) => {
   try {
     const instructorId = req.id;
-    const { title, description, courseId, duration, totalMarks, passingMarks, questions, allowMultipleAttempts } = req.body;
+    const { title, description, courseId, duration, totalMarks, passingMarks, questions, allowMultipleAttempts, selectedUsers, selectedCourses } = req.body;
 
     // Verify instructor owns the course
     const course = await Course.findOne({ _id: courseId, creator: instructorId });
@@ -24,6 +24,8 @@ export const createQuiz = async (req, res) => {
       passingMarks,
       questions,
       allowMultipleAttempts,
+      selectedUsers: selectedUsers || [],
+      selectedCourses: selectedCourses || [],
     });
 
     await quiz.save();
@@ -57,13 +59,31 @@ export const getCourseQuizzes = async (req, res) => {
       return res.status(403).json({ message: 'You are not authorized to view quizzes for this course' });
     }
 
-    const query = { courseId };
+    // Query for quizzes that belong to this course OR are shared with this course
+    const query = {
+      $or: [
+        { courseId: courseId }, // Quizzes created for this course
+        { selectedCourses: courseId } // Quizzes shared with this course
+      ]
+    };
+    
     if (!isInstructor) {
       query.isPublished = true;
+      // Filter by selected users
+      query.$and = [
+        {
+          $or: [
+            { selectedUsers: { $size: 0 } }, // No specific users selected (available to all)
+            { selectedUsers: userId }, // User is in the selected users list
+          ]
+        }
+      ];
     }
 
     const quizzes = await Quiz.find(query)
       .populate('instructorId', 'name email')
+      .populate('selectedUsers', 'name email')
+      .populate('selectedCourses', 'courseTitle')
       .sort({ createdAt: -1 });
 
     // For students, get their attempts

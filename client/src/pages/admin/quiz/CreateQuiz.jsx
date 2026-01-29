@@ -5,15 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useCreateQuizMutation } from '@/features/api/quizApi';
+import { useCreateQuizMutation, useGetCourseStudentsQuery } from '@/features/api/quizApi';
+import { useGetCreatorCoursesQuery } from '@/features/api/courseApi';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Plus, Trash2, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 const CreateQuiz = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [createQuiz, { isLoading }] = useCreateQuizMutation();
+  const { data: studentsData } = useGetCourseStudentsQuery(courseId);
+  const { data: coursesData } = useGetCreatorCoursesQuery();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -22,6 +26,8 @@ const CreateQuiz = () => {
     totalMarks: 0,
     passingMarks: 0,
     allowMultipleAttempts: false,
+    selectedUsers: [],
+    selectedCourses: [],
   });
 
   const [questions, setQuestions] = useState([
@@ -187,6 +193,104 @@ const CreateQuiz = () => {
                 className="w-4 h-4"
               />
               <Label htmlFor="allowMultipleAttempts">Allow Multiple Attempts</Label>
+            </div>
+
+            <div>
+              <Label>Selected Students (Leave empty for all enrolled students)</Label>
+              <div className="space-y-2">
+                <Select
+                  onValueChange={(value) => {
+                    if (value && !formData.selectedUsers.includes(value)) {
+                      setFormData({
+                        ...formData,
+                        selectedUsers: [...formData.selectedUsers, value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select students to assign quiz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {studentsData?.students?.map((student) => (
+                      <SelectItem key={student._id} value={student._id}>
+                        {student.name} ({student.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {formData.selectedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-2 border rounded-md">
+                    {formData.selectedUsers.map((userId) => {
+                      const student = studentsData?.students?.find(s => s._id === userId);
+                      return student ? (
+                        <Badge key={userId} variant="secondary" className="flex items-center gap-1">
+                          {student.name}
+                          <X
+                            className="w-3 h-3 cursor-pointer"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                selectedUsers: formData.selectedUsers.filter(id => id !== userId)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label>Display in Additional Courses (Current course is always included)</Label>
+              <div className="space-y-2">
+                <Select
+                  onValueChange={(value) => {
+                    if (value && !formData.selectedCourses.includes(value) && value !== courseId) {
+                      setFormData({
+                        ...formData,
+                        selectedCourses: [...formData.selectedCourses, value]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select courses to display this quiz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coursesData?.courses?.filter(course => course._id !== courseId).map((course) => (
+                      <SelectItem key={course._id} value={course._id}>
+                        {course.courseTitle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {formData.selectedCourses.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-2 border rounded-md">
+                    {formData.selectedCourses.map((courseIdSelected) => {
+                      const course = coursesData?.courses?.find(c => c._id === courseIdSelected);
+                      return course ? (
+                        <Badge key={courseIdSelected} variant="secondary" className="flex items-center gap-1">
+                          {course.courseTitle}
+                          <X
+                            className="w-3 h-3 cursor-pointer"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                selectedCourses: formData.selectedCourses.filter(id => id !== courseIdSelected)
+                              });
+                            }}
+                          />
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="border-t pt-6">

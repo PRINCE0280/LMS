@@ -7,6 +7,7 @@ import { courseProgressApi } from '@/features/api/courseProgressApi';
 import { subscriptionApi } from '@/features/api/subscriptionApi';
 import { assignmentApi } from '@/features/api/assignmentApi';
 import { quizApi } from '@/features/api/quizApi';
+import { reviewApi } from '@/features/api/reviewApi';
 
 
 const rootReducer = combineReducers({
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
    [subscriptionApi.reducerPath]: subscriptionApi.reducer,
    [assignmentApi.reducerPath]: assignmentApi.reducer,
    [quizApi.reducerPath]: quizApi.reducer,
+   [reviewApi.reducerPath]: reviewApi.reducer,
    auth: authReducer,
 });
 

@@ -1,4 +1,4 @@
-import { ChartNoAxesColumn, SquareLibrary, Menu } from 'lucide-react'
+import { ChartNoAxesColumn, SquareLibrary, Menu, Star } from 'lucide-react'
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -66,6 +66,10 @@ const Sidebar = () => {
                 <SquareLibrary size={22} />
                 <h1>Courses</h1>
               </Link>
+              <Link to="/admin/reviews" onClick={() => setOpen(false)} className='flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-800 pl-6 pr-4 py-3'>
+                <Star size={22} />
+                <h1>Reviews</h1>
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
@@ -85,6 +89,10 @@ const Sidebar = () => {
           <Link to="/admin/courses" className='flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-800 pl-6 pr-4 py-3'>
             <SquareLibrary size={22} />
             <h1>Courses</h1>
+          </Link>
+          <Link to="/admin/reviews" className='flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-800 pl-6 pr-4 py-3'>
+            <Star size={22} />
+            <h1>Reviews</h1>
           </Link>
         </div>
         

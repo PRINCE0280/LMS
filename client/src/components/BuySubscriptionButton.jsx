@@ -54,8 +54,16 @@ const BuySubscriptionButton = ({ subscriptionType, amount, title }) => {
 
               if (verifyResponse.success) {
                 toast.success("Subscription activated successfully!");
-                // Redirect to Generative AI page
-                window.location.href = "/generate-ai";
+                // Redirect based on subscription type
+                if (subscriptionType === 'generative-ai') {
+                  window.location.href = "/generate-ai";
+                } else if (subscriptionType === 'it-certifications') {
+                  window.location.href = "/it-certifications";
+                } else if (subscriptionType === 'data-science') {
+                  window.location.href = "/data-science";
+                } else {
+                  window.location.href = "/my-learning";
+                }
               } else {
                 toast.error("Payment verification failed");
               }

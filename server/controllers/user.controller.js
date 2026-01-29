@@ -211,7 +211,47 @@ export const resendOTP = async (req, res) => {
       }
 };
 
-// Send OTP for login
+// Login without OTP (OTP only for signup)
+export const login = async (req, res) => {
+      try {
+            const { email, password } = req.body;
+            
+            if (!email || !password) {
+                  return res.status(400).json({
+                        success: false,
+                        message: "All fields are required"
+                  });
+            }
+
+            const user = await User.findOne({ email });
+            if (!user) {
+                  return res.status(400).json({
+                        success: false,
+                        message: "Incorrect email or password"
+                  });
+            }
+
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            if (!isPasswordMatch) {
+                  return res.status(400).json({
+                        success: false,
+                        message: "Incorrect email or password"
+                  });
+            }
+
+            // Login directly without OTP
+            return generateToken(res, user, `Welcome back, ${user.name}`);
+            
+      } catch (error) {
+            console.error("Error during login:", error);
+            return res.status(500).json({
+                  success: false,
+                  message: "Failed to login"
+            });
+      }
+};
+
+// Send OTP for login (DEPRECATED - keeping for backward compatibility)
 export const sendLoginOTP = async (req, res) => {
       try {
             const { email, password } = req.body;
@@ -322,36 +362,6 @@ export const verifyLoginOTP = async (req, res) => {
       }
 };
 
-export const login = async (req, res) => {
-      try {
-            const { email, password } = req.body;
-            if (!email || !password) {
-                  return res.status(400).json({
-                        success: false,
-                        message: "All fields are required"
-                  });
-            }
-            const user = await User.findOne({ email });
-            if (!user) {
-                  return res.status(400).json({
-                        success: false,
-                        message: "Incorrect email or password"
-                  });
-            }
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
-            if (!isPasswordMatch) {
-                  return res.status(400).json({
-                        success: false,
-                        message: "Incorrect email or password"
-                  });
-            }
-            // Send a single response including cookie + JSON using helper
-            return generateToken(res, user, `Welcome back, ${user.name}`);
-      } catch (error) {
-            console.error("Error logging in user:", error);
-            res.status(500).json({ success: false, message: "Failed to log in user" });
-      }
-};
       export const logout = (_, res) => {
             try {
                   return res.status(200).cookie("token", "", {maxAge: 0}).json({

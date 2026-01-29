@@ -2,9 +2,8 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { 
       useSendRegisterOTPMutation,
-      useSendLoginOTPMutation,
+      useLoginUserMutation,
       useVerifyOTPMutation,
-      useVerifyLoginOTPMutation,
       useResendOTPMutation
 } from "@/features/api/authapi"
 import {
@@ -43,12 +42,12 @@ const Login = () => {
             isSuccess: registerOtpIsSuccess
       }] = useSendRegisterOTPMutation();
 
-      const [sendLoginOTP, {
-            data: loginOtpData,
-            error: loginOtpError,
-            isLoading: loginOtpIsLoading,
-            isSuccess: loginOtpIsSuccess
-      }] = useSendLoginOTPMutation();
+      const [loginUser, {
+            data: loginData,
+            error: loginError,
+            isLoading: loginIsLoading,
+            isSuccess: loginIsSuccess
+      }] = useLoginUserMutation();
 
       const [verifyOTP, {
             data: verifyData,
@@ -56,13 +55,6 @@ const Login = () => {
             isLoading: verifyIsLoading,
             isSuccess: verifyIsSuccess
       }] = useVerifyOTPMutation();
-
-      const [verifyLoginOTP, {
-            data: verifyLoginData,
-            error: verifyLoginError,
-            isLoading: verifyLoginIsLoading,
-            isSuccess: verifyLoginIsSuccess
-      }] = useVerifyLoginOTPMutation();
 
       const [resendOTP, {
             isLoading: resendIsLoading,
@@ -107,16 +99,11 @@ const Login = () => {
                   toast.error("Please enter a valid 6-digit OTP");
                   return;
             }
-            if (isLoginMode) {
-                  await verifyLoginOTP({ email: LoginInput.email, otp: otpInput });
-            } else {
-                  await verifyOTP({ email: signupInput.email, otp: otpInput });
-            }
+            await verifyOTP({ email: signupInput.email, otp: otpInput });
       };
 
       const handleResendOTP = async () => {
-            const email = isLoginMode ? LoginInput.email : signupInput.email;
-            await resendOTP({ email });
+            await resendOTP({ email: signupInput.email });
             setCountdown(60);
       };
 
@@ -125,8 +112,7 @@ const Login = () => {
                   toast.error("All fields are required");
                   return;
             }
-            setIsLoginMode(true);
-            await sendLoginOTP(LoginInput);
+            await loginUser(LoginInput);
       };
 
       useEffect(() => {
@@ -141,22 +127,14 @@ const Login = () => {
       }, [registerOtpIsSuccess, registerOtpError]);
 
       useEffect(() => {
-            if (loginOtpIsSuccess) {
-                  // Check if instructor logged in directly (has user object)
-                  if (loginOtpData?.user) {
-                        toast.success(loginOtpData.message || "Login successful!");
-                        navigate("/");
-                  } else {
-                        // Student needs OTP verification
-                        toast.success("OTP sent to your email successfully!");
-                        setShowOTPVerification(true);
-                        setCountdown(60);
-                  }
+            if (loginIsSuccess && loginData) {
+                  toast.success(loginData.message || "Login successful!");
+                  navigate("/");
             }
-            if (loginOtpError) {
-                  toast.error(loginOtpError?.data?.message || "Failed to send OTP");
+            if (loginError) {
+                  toast.error(loginError?.data?.message || "Login failed");
             }
-      }, [loginOtpIsSuccess, loginOtpError, loginOtpData, navigate]);
+      }, [loginIsSuccess, loginError, loginData, navigate]);
 
       useEffect(() => {
             if (verifyIsSuccess && verifyData) {
@@ -167,16 +145,6 @@ const Login = () => {
                   toast.error(verifyError?.data?.message || "Invalid OTP");
             }
       }, [verifyIsSuccess, verifyError, verifyData, navigate]);
-
-      useEffect(() => {
-            if (verifyLoginIsSuccess && verifyLoginData) {
-                  toast.success("Login successful!");
-                  navigate("/");
-            }
-            if (verifyLoginError) {
-                  toast.error(verifyLoginError?.data?.message || "Invalid OTP");
-            }
-      }, [verifyLoginIsSuccess, verifyLoginError, verifyLoginData, navigate]);
 
       useEffect(() => {
             if (resendIsSuccess) {
@@ -197,7 +165,7 @@ const Login = () => {
                                           <CardTitle className="text-2xl">Verify Your Email</CardTitle>
                                           <CardDescription>
                                                 We've sent a 6-digit OTP to<br />
-                                                <span className="font-semibold text-foreground">{isLoginMode ? LoginInput.email : signupInput.email}</span>
+                                                <span className="font-semibold text-foreground">{signupInput.email}</span>
                                           </CardDescription>
                                     </CardHeader>
                                     <CardContent className="grid gap-6">
@@ -371,12 +339,12 @@ const Login = () => {
                                                 </div>
                                           </CardContent>
                                           <CardFooter>
-                                                <Button disabled={loginOtpIsLoading} onClick={handleLogin}>
+                                                <Button disabled={loginIsLoading} onClick={handleLogin}>
                                                       {
-                                                            loginOtpIsLoading ?
+                                                            loginIsLoading ?
                                                                   (
                                                                         <>
-                                                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending OTP...
+                                                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...
                                                                         </>
                                                                   ) :
                                                                   "Login"

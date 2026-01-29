@@ -7,11 +7,13 @@ import {
   useInCompleteCourseMutation,
   useUpdateLectureProgressMutation,
 } from "@/features/api/courseProgressApi";
-import { CheckCircle, CheckCircle2, CirclePlay, FileText, Trophy } from "lucide-react";
+import { CheckCircle, CheckCircle2, CirclePlay, FileText, Trophy, Star } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ReactPlayer from "react-player";
+import ReviewModal from "@/components/ReviewModal";
+import { useGetUserReviewQuery } from "@/features/api/reviewApi";
 
 const CourseProgress = () => {
   const params = useParams();
@@ -46,6 +48,9 @@ const CourseProgress = () => {
   }, [completedSuccess, inCompletedSuccess]);
 
   const [currentLecture, setCurrentLecture] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+
+  const { data: userReview } = useGetUserReviewQuery(courseId);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Failed to load course details</p>;
@@ -178,8 +183,24 @@ const CourseProgress = () => {
               "Mark as completed"
             )}
           </Button>
+          <Button
+            onClick={() => setShowReviewModal(true)}
+            variant="outline"
+            className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+          >
+            <Star className="h-4 w-4 mr-2" />
+            {userReview?.review ? "Update Review" : "Write Review"}
+          </Button>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <ReviewModal
+          courseId={courseId}
+          onClose={() => setShowReviewModal(false)}
+        />
+      )}
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Video section  */}

@@ -24,6 +24,7 @@ export const quizApi = createApi({
         method: "GET",
       }),
       providesTags: ["Quiz"],
+      refetchOnMountOrArgChange: true,
     }),
     getQuiz: builder.query({
       query: (quizId) => ({

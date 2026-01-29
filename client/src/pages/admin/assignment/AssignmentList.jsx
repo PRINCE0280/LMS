@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGetCourseAssignmentsQuery, useDeleteAssignmentMutation, useUpdateAssignmentMutation } from '@/features/api/assignmentApi';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Eye, Users, Calendar, CheckCircle } from 'lucide-react';
+import { Loader2, Plus, Trash2, Eye, Users, Calendar, CheckCircle, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const AssignmentList = () => {
@@ -107,6 +107,13 @@ const AssignmentList = () => {
                       onClick={() => togglePublish(assignment)}
                     >
                       {assignment.isPublished ? 'Unpublish' : 'Publish'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/admin/assignment/${assignment._id}/edit`)}
+                    >
+                      <Pencil className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"

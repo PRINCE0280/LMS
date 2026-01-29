@@ -10,10 +10,21 @@ const CareerSkills = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const { user } = useSelector((store) => store.auth);
   
   // Check subscription status for Generative AI
   const { data: subscriptionStatus } = useCheckSubscriptionStatusQuery('generative-ai', {
+    skip: !user,
+  });
+
+  // Check subscription status for IT Certifications
+  const { data: itCertSubscriptionStatus } = useCheckSubscriptionStatusQuery('it-certifications', {
+    skip: !user,
+  });
+
+  // Check subscription status for Data Science
+  const { data: dataScienceSubscriptionStatus } = useCheckSubscriptionStatusQuery('data-science', {
     skip: !user,
   });
 
@@ -30,6 +41,7 @@ const CareerSkills = () => {
       id: 2,
       title: 'IT Certifications',
       students: '14M+',
+      price: '₹599',
       image: '/certifications.webp',
       bgColor: 'bg-gradient-to-br from-blue-400 to-blue-600'
     },
@@ -37,6 +49,7 @@ const CareerSkills = () => {
       id: 3,
       title: 'Data Science',
       students: '8.1M+',
+      price: '₹699',
       image: '/data-science.webp',
       bgColor: 'bg-gradient-to-br from-purple-200 to-blue-300'
     },
@@ -70,6 +83,33 @@ const CareerSkills = () => {
         if (!user) {
           navigate('/login');
         } else {
+          setSelectedCategory(category);
+          setShowSubscriptionModal(true);
+        }
+      }
+    } else if (category.title === 'IT Certifications') {
+      // Check if user has active subscription for IT Certifications
+      if (itCertSubscriptionStatus?.hasActiveSubscription) {
+        navigate('/it-certifications');
+      } else {
+        // Show subscription modal if not authenticated or no active subscription
+        if (!user) {
+          navigate('/login');
+        } else {
+          setSelectedCategory(category);
+          setShowSubscriptionModal(true);
+        }
+      }
+    } else if (category.title === 'Data Science') {
+      // Check if user has active subscription for Data Science
+      if (dataScienceSubscriptionStatus?.hasActiveSubscription) {
+        navigate('/data-science');
+      } else {
+        // Show subscription modal if not authenticated or no active subscription
+        if (!user) {
+          navigate('/login');
+        } else {
+          setSelectedCategory(category);
           setShowSubscriptionModal(true);
         }
       }
@@ -191,11 +231,14 @@ const CareerSkills = () => {
         </div>
 
         {/* Subscription Modal */}
-        {showSubscriptionModal && (
+        {showSubscriptionModal && selectedCategory && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-300">
               <button
-                onClick={() => setShowSubscriptionModal(false)}
+                onClick={() => {
+                  setShowSubscriptionModal(false);
+                  setSelectedCategory(null);
+                }}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
                 <X className="w-6 h-6" />
@@ -203,46 +246,105 @@ const CareerSkills = () => {
               
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Subscribe to Generative AI
+                  Subscribe to {selectedCategory.title}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Get unlimited access to Generative AI tools and courses
+                  {selectedCategory.title === 'Generative AI'
+                    ? 'Get unlimited access to Generative AI tools and courses'
+                    : selectedCategory.title === 'IT Certifications'
+                    ? 'Get comprehensive IT certification courses and exam preparation'
+                    : 'Master data science with comprehensive courses and real-world projects'}
                 </p>
               </div>
 
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 mb-6">
                 <div className="flex items-baseline justify-center mb-4">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">₹499</span>
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                    {selectedCategory.title === 'Generative AI' ? '₹499' : selectedCategory.title === 'IT Certifications' ? '₹599' : '₹699'}
+                  </span>
                   <span className="text-gray-600 dark:text-gray-300 ml-2">/ month</span>
                 </div>
                 <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Unlimited AI tool access
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Premium courses and tutorials
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Priority support
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Cancel anytime
-                  </li>
+                  {selectedCategory.title === 'Generative AI' ? (
+                    <>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Unlimited AI tool access
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Premium courses and tutorials
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Priority support
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Cancel anytime
+                      </li>
+                    </>
+                  ) : selectedCategory.title === 'IT Certifications' ? (
+                    <>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        AWS, Azure, GCP certification courses
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Practice exams and mock tests
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Hands-on labs and projects
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Study guides and resources
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Career guidance and placement support
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Python, R, SQL comprehensive courses
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Machine Learning & AI algorithms
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Data visualization & analytics tools
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Real-world datasets & projects
+                      </li>
+                      <li className="flex items-center">
+                        <span className="text-green-500 mr-2">✓</span>
+                        Industry expert mentorship
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
 
               <BuySubscriptionButton
-                subscriptionType="generative-ai"
-                amount={499}
-                title="Generative AI Subscription"
+                subscriptionType={selectedCategory.title === 'Generative AI' ? 'generative-ai' : selectedCategory.title === 'IT Certifications' ? 'it-certifications' : 'data-science'}
+                amount={selectedCategory.title === 'Generative AI' ? 499 : selectedCategory.title === 'IT Certifications' ? 599 : 699}
+                title={`${selectedCategory.title} Subscription`}
               />
               
               <button
-                onClick={() => setShowSubscriptionModal(false)}
+                onClick={() => {
+                  setShowSubscriptionModal(false);
+                  setSelectedCategory(null);
+                }}
                 className="w-full mt-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 Maybe later

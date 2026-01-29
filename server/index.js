@@ -11,6 +11,7 @@ import courseProgressRoute from './routes/courseProgress.route.js';
 import subscriptionRoute from './routes/subscription.route.js';
 import assignmentRoute from './routes/assignment.route.js';
 import quizRoute from './routes/quiz.route.js';
+import reviewRoute from './routes/review.route.js';
 dotenv.config({});
 
 connectDB();
@@ -35,6 +36,7 @@ app.use('/api/v1/progress', courseProgressRoute);
 app.use('/api/v1/subscription', subscriptionRoute);
 app.use('/api/v1/assignment', assignmentRoute);
 app.use('/api/v1/quiz', quizRoute);
+app.use('/api/v1/review', reviewRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

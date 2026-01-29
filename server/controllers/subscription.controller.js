@@ -16,7 +16,8 @@ export const createSubscriptionOrder = async (req, res) => {
     const { subscriptionType, amount } = req.body;
 
     // Validate subscription type
-    if (subscriptionType !== "generative-ai") {
+    const validSubscriptionTypes = ["generative-ai", "it-certifications", "data-science"];
+    if (!validSubscriptionTypes.includes(subscriptionType)) {
       return res.status(400).json({ message: "Invalid subscription type" });
     }
 

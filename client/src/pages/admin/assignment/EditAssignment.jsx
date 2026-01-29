@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useCreateAssignmentMutation } from '@/features/api/assignmentApi';
+import { useGetAssignmentQuery, useUpdateAssignmentMutation } from '@/features/api/assignmentApi';
 import { useGetCourseStudentsQuery } from '@/features/api/quizApi';
 import { useGetCreatorCoursesQuery } from '@/features/api/courseApi';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,11 +16,16 @@ import axios from 'axios';
 
 const MEDIA_API = "http://localhost:5000/api/v1/media";
 
-const CreateAssignment = () => {
-  const { courseId } = useParams();
+const EditAssignment = () => {
+  const { assignmentId } = useParams();
   const navigate = useNavigate();
-  const [createAssignment, { isLoading }] = useCreateAssignmentMutation();
-  const { data: studentsData } = useGetCourseStudentsQuery(courseId);
+  const { data: assignmentData, isLoading: loadingAssignment } = useGetAssignmentQuery(assignmentId);
+  const [updateAssignment, { isLoading }] = useUpdateAssignmentMutation();
+  
+  const assignment = assignmentData?.assignment;
+  const courseId = assignment?.courseId?._id || assignment?.courseId;
+
+  const { data: studentsData } = useGetCourseStudentsQuery(courseId, { skip: !courseId });
   const { data: coursesData } = useGetCreatorCoursesQuery();
 
   const [formData, setFormData] = useState({
@@ -34,6 +39,20 @@ const CreateAssignment = () => {
 
   const [attachments, setAttachments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (assignment) {
+      setFormData({
+        title: assignment.title || '',
+        description: assignment.description || '',
+        dueDate: assignment.dueDate ? new Date(assignment.dueDate).toISOString().slice(0, 16) : '',
+        totalMarks: assignment.totalMarks || 100,
+        selectedUsers: assignment.selectedUsers?.map(u => u._id || u) || [],
+        selectedCourses: assignment.selectedCourses?.map(c => c._id || c) || [],
+      });
+      setAttachments(assignment.attachments || []);
+    }
+  }, [assignment]);
 
   const handleChange = (e) => {
     setFormData({
@@ -91,36 +110,40 @@ const CreateAssignment = () => {
     }
 
     try {
-      await createAssignment({
+      await updateAssignment({
+        assignmentId,
         ...formData,
-        courseId,
         attachments,
         selectedUsers: formData.selectedUsers,
         selectedCourses: formData.selectedCourses,
       }).unwrap();
       
-      toast.success('Assignment created successfully');
-      navigate(`/admin/course/${courseId}/assignments`);
+      toast.success('Assignment updated successfully');
+      navigate(-1);
     } catch (error) {
-      console.error('Error creating assignment:', error);
-      toast.error(error?.data?.message || 'Failed to create assignment');
+      console.error('Error updating assignment:', error);
+      toast.error(error?.data?.message || 'Failed to update assignment');
     }
   };
 
+  if (loadingAssignment) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Button
-        variant="ghost"
-        onClick={() => navigate(-1)}
-        className="mb-4"
-      >
+    <div className="p-6 max-w-4xl mx-auto">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create New Assignment</CardTitle>
+          <CardTitle>Edit Assignment</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -284,35 +307,26 @@ const CreateAssignment = () => {
                     onChange={handleFileUpload}
                     multiple
                     accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip"
+                    className="flex-1"
                     disabled={isUploading}
-                    className="cursor-pointer"
                   />
-                  {isUploading && (
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                  )}
+                  {isUploading && <Loader2 className="w-5 h-5 animate-spin" />}
                 </div>
-                <p className="text-sm text-gray-500">
-                  Upload assignment files (PDF, Word, PowerPoint, Text, ZIP)
-                </p>
-
-                {/* Display uploaded files */}
+                
                 {attachments.length > 0 && (
-                  <div className="space-y-2 mt-3">
+                  <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <p className="text-sm font-medium">Uploaded Files:</p>
                     {attachments.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
-                      >
+                      <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded border">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">{file.fileName}</span>
+                          <span className="text-sm">{file.fileName}</span>
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeAttachment(index)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -324,26 +338,11 @@ const CreateAssignment = () => {
             </div>
 
             <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  'Create Assignment'
-                )}
+              <Button type="submit" disabled={isLoading || isUploading}>
+                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Update Assignment
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                className="w-full"
-              >
+              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
             </div>
@@ -354,4 +353,4 @@ const CreateAssignment = () => {
   );
 };
 
-export default CreateAssignment;
+export default EditAssignment;

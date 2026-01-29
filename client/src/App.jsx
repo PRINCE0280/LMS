@@ -6,6 +6,8 @@ import MainLayout from "./layout/MainLayout"
 import Courses from "./pages/student/Courses"
 import CareerSkills from "./pages/student/CareerSkills"
 import GenerateAI from "./pages/student/GenerateAI"
+import ITCertifications from "./pages/student/ITCertifications"
+import DataScience from "./pages/student/DataScience"
 import MyLearning from "./pages/student/MyLearning"
 import Profile from "./pages/student/Profile"
 import Sidebar from "./pages/admin/lecture/Sidebar"
@@ -23,6 +25,8 @@ import PurchaseCourseProtectedRoute from './components/PurchaseCourseProtectedRo
 import SubscriptionProtectedRoute from './components/SubscriptionProtectedRoute'
 import { ThemeProvider } from './components/ThemeProvider'
 import CreateAssignment from './pages/admin/assignment/CreateAssignment'
+import EditAssignment from './pages/admin/assignment/EditAssignment'
+import ViewAssignment from './pages/admin/assignment/ViewAssignment'
 import AssignmentList from './pages/admin/assignment/AssignmentList'
 import AssignmentSubmissions from './pages/admin/assignment/AssignmentSubmissions'
 import CreateQuiz from './pages/admin/quiz/CreateQuiz'
@@ -37,6 +41,7 @@ import AssignmentSubmission from './pages/student/AssignmentSubmission'
 import StudentQuizzes from './pages/student/StudentQuizzes'
 import TakeQuiz from './pages/student/TakeQuiz'
 import QuizResult from './pages/student/QuizResult'
+import InstructorReviews from './pages/admin/InstructorReviews'
 
 
   const appRouter = createBrowserRouter([
@@ -71,6 +76,22 @@ import QuizResult from './pages/student/QuizResult'
           element: <ProtectedRoute>
             <SubscriptionProtectedRoute subscriptionType="generative-ai">
               <GenerateAI />
+            </SubscriptionProtectedRoute>
+          </ProtectedRoute>
+        },
+        {
+          path: "it-certifications",
+          element: <ProtectedRoute>
+            <SubscriptionProtectedRoute subscriptionType="it-certifications">
+              <ITCertifications />
+            </SubscriptionProtectedRoute>
+          </ProtectedRoute>
+        },
+        {
+          path: "data-science",
+          element: <ProtectedRoute>
+            <SubscriptionProtectedRoute subscriptionType="data-science">
+              <DataScience />
             </SubscriptionProtectedRoute>
           </ProtectedRoute>
         },
@@ -171,6 +192,14 @@ import QuizResult from './pages/student/QuizResult'
               element: <CreateAssignment />
             },
             {
+              path: "assignment/:assignmentId/edit",
+              element: <EditAssignment />
+            },
+            {
+              path: "assignment/:assignmentId",
+              element: <ViewAssignment />
+            },
+            {
               path: "assignment/:assignmentId/submissions",
               element: <AssignmentSubmissions />
             },
@@ -209,6 +238,10 @@ import QuizResult from './pages/student/QuizResult'
             {
               path: "quiz/:quizId/attempts",
               element: <QuizAttempts />
+            },
+            {
+              path: "reviews",
+              element: <InstructorReviews />
             }
           ]
         }

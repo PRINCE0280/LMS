@@ -2,9 +2,8 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { 
       useSendRegisterOTPMutation, 
-      useSendLoginOTPMutation,
+      useLoginUserMutation,
       useVerifyOTPMutation,
-      useVerifyLoginOTPMutation,
       useResendOTPMutation
 } from "@/features/api/authapi"
 import {
@@ -39,7 +38,6 @@ const AuthModal = ({ open, onOpenChange }) => {
       const [signupInput, setSignupInput] = useState({ name: "", email: "", password: "" });
       const [otpInput, setOtpInput] = useState("");
       const [showOTPVerification, setShowOTPVerification] = useState(false);
-      const [isLoginMode, setIsLoginMode] = useState(false);
       const [countdown, setCountdown] = useState(0);
 
       const [sendRegisterOTP, {
@@ -48,12 +46,12 @@ const AuthModal = ({ open, onOpenChange }) => {
             isSuccess: registerOtpIsSuccess
       }] = useSendRegisterOTPMutation();
 
-      const [sendLoginOTP, {
-            data: loginOtpData,
-            error: loginOtpError,
-            isLoading: loginOtpIsLoading,
-            isSuccess: loginOtpIsSuccess
-      }] = useSendLoginOTPMutation();
+      const [loginUser, {
+            data: loginData,
+            error: loginError,
+            isLoading: loginIsLoading,
+            isSuccess: loginIsSuccess
+      }] = useLoginUserMutation();
 
       const [verifyOTP, {
             data: verifyData,
@@ -61,13 +59,6 @@ const AuthModal = ({ open, onOpenChange }) => {
             isLoading: verifyIsLoading,
             isSuccess: verifyIsSuccess
       }] = useVerifyOTPMutation();
-
-      const [verifyLoginOTP, {
-            data: verifyLoginData,
-            error: verifyLoginError,
-            isLoading: verifyLoginIsLoading,
-            isSuccess: verifyLoginIsSuccess
-      }] = useVerifyLoginOTPMutation();
 
       const [resendOTP, {
             isLoading: resendIsLoading,
@@ -103,7 +94,6 @@ const AuthModal = ({ open, onOpenChange }) => {
                   toast.error("Password must be at least 6 characters");
                   return;
             }
-            setIsLoginMode(false);
             await sendRegisterOTP(signupInput);
       };
 
@@ -112,16 +102,11 @@ const AuthModal = ({ open, onOpenChange }) => {
                   toast.error("Please enter a valid 6-digit OTP");
                   return;
             }
-            if (isLoginMode) {
-                  await verifyLoginOTP({ email: LoginInput.email, otp: otpInput });
-            } else {
-                  await verifyOTP({ email: signupInput.email, otp: otpInput });
-            }
+            await verifyOTP({ email: signupInput.email, otp: otpInput });
       };
 
       const handleResendOTP = async () => {
-            const email = isLoginMode ? LoginInput.email : signupInput.email;
-            await resendOTP({ email });
+            await resendOTP({ email: signupInput.email });
             setCountdown(60);
       };
 
@@ -130,8 +115,7 @@ const AuthModal = ({ open, onOpenChange }) => {
                   toast.error("All fields are required");
                   return;
             }
-            setIsLoginMode(true);
-            await sendLoginOTP(LoginInput);
+            await loginUser(LoginInput);
       };
 
       useEffect(() => {
@@ -146,23 +130,15 @@ const AuthModal = ({ open, onOpenChange }) => {
       }, [registerOtpIsSuccess, registerOtpError]);
 
       useEffect(() => {
-            if (loginOtpIsSuccess) {
-                  // Check if instructor logged in directly (has user object)
-                  if (loginOtpData?.user) {
-                        toast.success(loginOtpData.message || "Login successful!");
-                        onOpenChange(false);
-                        navigate("/");
-                  } else {
-                        // Student needs OTP verification
-                        toast.success("OTP sent to your email successfully!");
-                        setShowOTPVerification(true);
-                        setCountdown(60);
-                  }
+            if (loginIsSuccess && loginData) {
+                  toast.success(loginData.message || "Login successful!");
+                  onOpenChange(false);
+                  navigate("/");
             }
-            if (loginOtpError) {
-                  toast.error(loginOtpError?.data?.message || "Failed to send OTP");
+            if (loginError) {
+                  toast.error(loginError?.data?.message || "Login failed");
             }
-      }, [loginOtpIsSuccess, loginOtpError, loginOtpData, navigate, onOpenChange]);
+      }, [loginIsSuccess, loginError, loginData, navigate, onOpenChange]);
 
       useEffect(() => {
             if (verifyIsSuccess && verifyData) {
@@ -176,19 +152,6 @@ const AuthModal = ({ open, onOpenChange }) => {
                   toast.error(verifyError?.data?.message || "Invalid OTP");
             }
       }, [verifyIsSuccess, verifyError, verifyData, navigate, onOpenChange]);
-
-      useEffect(() => {
-            if (verifyLoginIsSuccess && verifyLoginData) {
-                  toast.success("Login successful!");
-                  setShowOTPVerification(false);
-                  setOtpInput("");
-                  onOpenChange(false);
-                  navigate("/");
-            }
-            if (verifyLoginError) {
-                  toast.error(verifyLoginError?.data?.message || "Invalid OTP");
-            }
-      }, [verifyLoginIsSuccess, verifyLoginError, verifyLoginData, navigate, onOpenChange]);
 
       useEffect(() => {
             if (resendIsSuccess) {
@@ -252,10 +215,10 @@ const AuthModal = ({ open, onOpenChange }) => {
                                           <CardFooter className="flex flex-col gap-3 px-0">
                                                 <Button 
                                                       className="w-full" 
-                                                      disabled={verifyIsLoading || verifyLoginIsLoading || otpInput.length !== 6} 
+                                                      disabled={verifyIsLoading || otpInput.length !== 6} 
                                                       onClick={handleVerifyOTP}
                                                 >
-                                                      {(verifyIsLoading || verifyLoginIsLoading) ? (
+                                                      {verifyIsLoading ? (
                                                             <>
                                                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                                   Verifying...
@@ -285,10 +248,9 @@ const AuthModal = ({ open, onOpenChange }) => {
                                                       onClick={() => {
                                                             setShowOTPVerification(false);
                                                             setOtpInput("");
-                                                            setIsLoginMode(false);
                                                       }}
                                                 >
-                                                      Back to {isLoginMode ? "Login" : "Signup"}
+                                                      Back to Signup
                                                 </Button>
                                           </CardFooter>
                                     </Card>
@@ -343,14 +305,14 @@ const AuthModal = ({ open, onOpenChange }) => {
                                           <CardFooter className="px-0">
                                                 <Button 
                                                       className="w-full" 
-                                                      disabled={loginOtpIsLoading} 
+                                                      disabled={loginIsLoading} 
                                                       onClick={handleLogin}
                                                 >
                                                       {
-                                                            loginOtpIsLoading ?
+                                                            loginIsLoading ?
                                                                   (
                                                                         <>
-                                                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending OTP...
+                                                                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...
                                                                         </>
                                                                   ) : "Login"
                                                       }

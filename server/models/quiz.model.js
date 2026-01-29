@@ -64,6 +64,14 @@ const quizSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  selectedUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  selectedCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+  }],
 }, { timestamps: true });
 
 const quizAttemptSchema = new mongoose.Schema({

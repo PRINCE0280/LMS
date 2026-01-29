@@ -6,7 +6,7 @@ import User from '../models/user.model.js';
 export const createAssignment = async (req, res) => {
   try {
     const instructorId = req.id;
-    const { title, description, courseId, dueDate, totalMarks, attachments } = req.body;
+    const { title, description, courseId, dueDate, totalMarks, attachments, selectedUsers, selectedCourses } = req.body;
 
     // Verify instructor owns the course
     const course = await Course.findOne({ _id: courseId, creator: instructorId });
@@ -22,6 +22,8 @@ export const createAssignment = async (req, res) => {
       dueDate,
       totalMarks,
       attachments: attachments || [],
+      selectedUsers: selectedUsers || [],
+      selectedCourses: selectedCourses || [],
     });
 
     await assignment.save();
@@ -63,9 +65,28 @@ export const getCourseAssignments = async (req, res) => {
       query.isPublished = true;
     }
 
-    const assignments = await Assignment.find(query)
+    let assignments = await Assignment.find(query)
       .populate('instructorId', 'name email')
       .sort({ createdAt: -1 });
+
+    // Filter assignments based on selectedUsers and selectedCourses for students
+    if (!isInstructor) {
+      assignments = assignments.filter(assignment => {
+        // If no users selected, show to all enrolled students
+        if (assignment.selectedUsers.length === 0 && assignment.selectedCourses.length === 0) {
+          return true;
+        }
+        // Check if user is in selectedUsers
+        if (assignment.selectedUsers.length > 0 && assignment.selectedUsers.some(id => id.toString() === userId)) {
+          return true;
+        }
+        // Check if course is in selectedCourses
+        if (assignment.selectedCourses.length > 0 && assignment.selectedCourses.some(id => id.toString() === courseId)) {
+          return true;
+        }
+        return false;
+      });
+    }
 
     res.status(200).json({
       success: true,

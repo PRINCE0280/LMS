@@ -67,18 +67,26 @@ const CourseTable = () => {
       <TableCaption>A list of your recent courses.</TableCaption>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-[80px]">Thumbnail</TableHead>
+          <TableHead>Title</TableHead>
           <TableHead className="w-[100px]">Price</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Title</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {data.courses.map((course) => (
           <TableRow key={course._id}>
-            <TableCell className="font-medium">{course?.CoursePrice || "NA"}</TableCell>
+            <TableCell>
+              <img 
+                src={course.CourseThumbnail || '/placeholder-course.png'} 
+                alt={course.courseTitle}
+                className="w-16 h-16 object-cover rounded"
+              />
+            </TableCell>
+            <TableCell className="font-medium">{course.courseTitle}</TableCell>
+            <TableCell>{course?.CoursePrice || "NA"}</TableCell>
             <TableCell><Badge>{course.isPublished ? "Published" : "Draft"}</Badge></TableCell>
-            <TableCell>{course.courseTitle}</TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
                 <Button 

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Calendar, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import { Loader2, ArrowLeft, Calendar, CheckCircle, AlertCircle, FileText, Download, Eye } from 'lucide-react';
 
 const AssignmentSubmission = () => {
   const { assignmentId } = useParams();
@@ -54,7 +54,7 @@ const AssignmentSubmission = () => {
   const isPastDue = new Date() > new Date(assignment?.dueDate);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 pt-8 mt-4">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Assignments
@@ -96,6 +96,53 @@ const AssignmentSubmission = () => {
               {assignment?.description}
             </p>
           </div>
+
+          {/* Display Assignment Files */}
+          {assignment?.attachments && assignment.attachments.length > 0 && (
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-3">
+                Assignment Files:
+              </h3>
+              <div className="space-y-2">
+                {assignment.attachments.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      <span className="font-medium">{file.fileName}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(file.fileUrl, '_blank')}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = file.fileUrl;
+                          link.download = file.fileName;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
