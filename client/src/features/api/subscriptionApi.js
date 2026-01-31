@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { authApi } from "./authapi";
 
-const SUBSCRIPTION_API = "http://localhost:5000/api/v1/subscription";
+const SUBSCRIPTION_API = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/subscription`;
 
 export const subscriptionApi = createApi({
   reducerPath: "subscriptionApi",
